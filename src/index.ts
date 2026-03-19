@@ -2,17 +2,16 @@
  * BlazeConnector v3 - Entry Point
  * 
  * Production-ready ISP messaging and billing platform
- * Built with Bun + Hono + TypeScript
+ * Built with Hono + TypeScript (Bun or Node.js)
  */
 
-import { serve } from 'bun';
-import app from './api';
-import { getConfig, isDev } from './core/config';
-import { log } from './core/logger';
-import { closeRedis, getRedis } from './queue/redis';
-import { closeDb, getDb } from './db';
-import { startMessageWorker, stopMessageWorker } from './workers';
-import { WebSocketServer } from './ws/index.js';
+import { serve } from '@hono/node-server';
+import app from './api/index.js';
+import { getConfig, isDev } from './core/config.js';
+import { log } from './core/logger.js';
+import { closeRedis, getRedis } from './queue/redis.js';
+import { closeDb, getDb } from './db/index.js';
+import { startMessageWorker, stopMessageWorker } from './workers/index.js';
 
 // ============================================================================
 // Startup
@@ -40,53 +39,30 @@ async function main() {
     await startMessageWorker();
   }
   
-  // Start WebSocket server
-  const wsServer = new WebSocketServer();
+  // Detect runtime and start server
+  const isBun = typeof Bun !== 'undefined';
   
-  // Start HTTP server with Bun
+  // Use Hono's Node adapter
   const server = serve({
+    fetch: app.fetch,
     port: config.port,
-    fetch(request, server) {
-      // Handle WebSocket upgrade
-      const url = new URL(request.url);
-      
-      if (url.pathname === '/ws') {
-        const upgraded = server.upgrade(request, {
-          data: { connectedAt: new Date() },
-        });
-        
-        if (upgraded) {
-          return undefined; // WebSocket handled
-        }
-        
-        return new Response('WebSocket upgrade failed', { status: 500 });
-      }
-      
-      // Handle HTTP requests with Hono
-      return app.fetch(request, { server });
-    },
-    websocket: wsServer.getHandler(),
   });
   
-  log.system.info(`🚀 Server running on http://localhost:${config.port}`);
+  const runtime = isBun ? 'Bun' : 'Node.js';
+  log.system.info(`🚀 Server running on ${runtime} at http://localhost:${config.port}`);
   
   if (isDev()) {
-    log.system.info(`📚 API Docs: http://localhost:${config.port}/api/v3/docs`);
-    log.system.info(`❤️  Health: http://localhost:${config.port}/health`);
+    log.system.info(`📚 Health: http://localhost:${config.port}/health`);
   }
   
   // Graceful shutdown
   const shutdown = async (signal: string) => {
     log.system.info(`Received ${signal}, shutting down gracefully...`);
     
-    // Stop accepting new connections
-    server.stop(true);
+    server.close();
     
     // Stop message worker
     await stopMessageWorker();
-    
-    // Close WebSocket connections
-    wsServer.close();
     
     // Close database
     await closeDb();
@@ -106,7 +82,7 @@ async function main() {
 
 // Run
 main().catch((err) => {
-  log.system.fatal(err, 'Failed to start server');
+  log.system.fatal({ err }, 'Failed to start server');
   process.exit(1);
 });
 

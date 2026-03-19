@@ -1,13 +1,13 @@
 /**
- * Database - BlazeConnector v3
- * PostgreSQL connection with Drizzle ORM
+ * Database Connection - BlazeConnector v3
+ * PostgreSQL with Drizzle ORM
  */
 
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { getConfig } from '../core/config';
-import { log } from '../core/logger';
-import * as schema from './schema';
+import { getConfig } from '../core/config.js';
+import { log } from '../core/logger.js';
+import * as schema from './schema.js';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let _connection: postgres.Sql | null = null;
@@ -20,7 +20,6 @@ export function getDb() {
       max: 20,
       idle_timeout: 20,
       connect_timeout: 10,
-      onnotice: () => {}, // Suppress notices
     });
     
     _db = drizzle(_connection, { schema });

@@ -5,11 +5,11 @@
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { requestId, requestLogger, errorHandler, notFoundHandler } from './middleware';
-import healthRoutes from './routes/health';
-import messageRoutes from './routes/messages';
-import clientRoutes from './routes/clients';
-import { getConfig } from '../core/config';
+import { requestId, requestLogger, errorHandler, notFoundHandler } from './middleware.js';
+import healthRoutes from './routes/health.js';
+import messageRoutes from './routes/messages.js';
+import clientRoutes from './routes/clients.js';
+import { getConfig } from '../core/config.js';
 
 const app = new Hono();
 
@@ -52,8 +52,8 @@ app.get('/', (c) => {
     name: 'BlazeConnector',
     version: '3.0.0',
     description: 'Production-ready ISP messaging and billing platform',
-    docs: '/api/v3/docs',
     health: '/health',
+    api: '/api/v3',
   });
 });
 

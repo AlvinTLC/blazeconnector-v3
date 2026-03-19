@@ -5,15 +5,12 @@
   "description": "BlazeConnector v3 - Production-ready ISP messaging and billing platform",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "bun run --watch src/index.ts",
-    "start": "bun run src/index.ts",
-    "dev:node": "npx tsx watch src/index.ts",
-    "start:node": "npx tsx src/index.ts",
+    "dev": "npx tsx watch src/index.ts",
+    "start": "npx tsx src/index.ts",
+    "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "build": "bun build src/index.ts --outdir dist --target bun",
-    "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -22,6 +19,8 @@
   },
   "dependencies": {
     "hono": "^4.6.0",
+    "@hono/node-server": "^1.13.0",
+    "@hono/zod-validator": "^0.4.0",
     "zod": "^3.24.0",
     "ioredis": "^5.4.2",
     "postgres": "^3.4.5",
@@ -29,8 +28,7 @@
     "drizzle-zod": "^0.5.0",
     "nanoid": "^5.0.0",
     "pino": "^9.5.0",
-    "pino-pretty": "^13.0.0",
-    "@hono/zod-validator": "^0.4.0"
+    "pino-pretty": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -41,7 +39,6 @@
     "tsx": "^4.19.0"
   },
   "engines": {
-    "node": ">=22.0.0",
-    "bun": ">=1.1.0"
+    "node": ">=22.0.0"
   }
 }

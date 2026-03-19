@@ -4,7 +4,7 @@
  */
 
 import pino from 'pino';
-import { getConfig } from './config';
+import { getConfig } from './config.js';
 
 let _logger: pino.Logger | null = null;
 
@@ -26,12 +26,6 @@ export function getLogger(): pino.Logger {
         : undefined,
       formatters: {
         level: (label) => ({ level: label }),
-      },
-      serializers: {
-        err: pino.stdSerializers.err,
-        error: pino.stdSerializers.err,
-        req: pino.stdSerializers.req,
-        res: pino.stdSerializers.res,
       },
     });
   }
